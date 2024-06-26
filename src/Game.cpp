@@ -1,9 +1,18 @@
 #include "Game.h"
 #include "TextureManager.h"
-#include "GameObject.h"
+#include "Map.h"
 
+#include "EntityComponentSystem/EntityComponentSystem.h"
+#include "EntityComponentSystem/Components.h"
+#include "Vector2D.h"
 
-GameObject* player;
+Map* map;
+Manager manager;
+
+SDL_Renderer *Game::renderer = nullptr;
+SDL_Event Game::event;
+
+auto& player(manager.addEntity());
 
 Game::Game()
 {
@@ -34,17 +43,23 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     }
     isRunning = true;
 
-    player = new GameObject("../assets/batman.png", renderer, 0, 0);
+    map = new Map();
 
+    player.addComponent<TransformComponent>();
+    player.addComponent<SpriteComponent>("assets/knight.png");
+    player.addComponent<KeyboardController>();
 }
 void Game::update()
 {
-    player->Update();
+    manager.refresh();
+    manager.update();
 }
 void Game::render()
 {
     SDL_RenderClear(renderer);
-    player->Render();
+    map->DrawMap();
+
+    manager.draw();
     SDL_RenderPresent(renderer);
 }
 void Game::handleEvents()
